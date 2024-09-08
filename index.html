@@ -1,5 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+
+<script>
+    // Fungsi untuk mendeteksi apakah menggunakan HTML view dalam aplikasi
+    function isHtmlView() {
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+        // Cek apakah user agent adalah aplikasi Android atau iOS yang menggunakan WebView
+        if (/android/i.test(userAgent) && !/chrome|firefox|safari/i.test(userAgent)) {
+            return true;
+        }
+        if (/iPhone|iPod|iPad/i.test(userAgent) && !/Safari/i.test(userAgent)) {
+            return true;
+        }
+        return false;
+    }
+
+    // Fungsi untuk mengarahkan pengguna ke browser
+    function redirectToBrowser() {
+        if (isHtmlView()) {
+            alert("Anda sedang menggunakan aplikasi. Untuk pengalaman terbaik, silakan buka di browser.");
+            const currentUrl = window.location.href;
+            window.location.href = "googlechrome://navigate?url=" + currentUrl;
+        }
+    }
+
+    // Panggil fungsi untuk memeriksa dan mengarahkan jika perlu
+    redirectToBrowser();
+</script>
+
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
