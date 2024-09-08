@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Scanner</title>
+    <script src="html5-qrcode.min.js"></script>
+
+    <style>
+		/* Gaya untuk animasi loading */
+		#loading {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(255, 255, 255, 0.8);
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			z-index: 9999;
+		}
+
+		.loader {
+			border: 8px solid #f3f3f3;
+			border-radius: 50%;
+			border-top: 8px solid #3498db;
+			width: 50px;
+			height: 50px;
+			animation: spin 1s linear infinite;
+		}
+
+		@keyframes spin {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
+		}
+        #reader {
+            width: 300px;
+            height: 300px; 
+            max-height: 80vh;
+            overflow: hidden;
+        }
+
+        #upload-button {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background-color: #4CAF50; /* Green */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        #upload-button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        #upload-button:active {
+            background-color: #3e8e41;
+        }
+
+        #upload-button:focus {
+            outline: none;
+        }
+
+        #scan-result {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <h1>SCAN QR CODE</h1>
+		<div id="loading" style="display: none;">
+			<p>Loading...</p>
+			<div class="loader"></div>
+		</div>
+
+        <div id="reader" style="width:300px; height:300px;"></div>
+        <p id="scan-result"></p>
+        <button id="upload-button">Upload Kode QR</button>
+        <input type="file" id="qr-input-file" accept="image/*" style="display:none;">
+
+        <script>
+		let html5QrCode;
+		let isUsingCamera = true;
+
+		function showLoading() {
+			document.getElementById("loading").style.display = "flex";
+		}
+
+		function hideLoading() {
+			document.getElementById("loading").style.display = "none";
+		}
+
+		function processDecodedText(decodedText) {
+			console.log(`Code scanned = ${decodedText}`);
+			const urlParams = new URLSearchParams(new URL(decodedText).search);
+			const username = urlParams.get('username');
+			const password = urlParams.get('password');
+
+			if (username && password) {
+				if (username === password) {
+					document.getElementById("scan-result").innerHTML = `Voucher = ${username}`;
+				} else {
+					document.getElementById("scan-result").innerHTML = `username=${username}<br>password=${password}`;
+				}
+
+				setTimeout(() => {
+					window.location.href = decodedText;
+				}, 1000);
+			} else {
+				document.getElementById("scan-result").textContent = `${decodedText} - Maaf, ini bukan QR code untuk login`;
+				
+				if (!isUsingCamera) {
+					setTimeout(() => {
+						location.reload();
+					}, 2000);
+				} else {
+					setTimeout(() => {
+						document.getElementById("scan-result").textContent = "";
+					}, 2000);
+				}
+			}
+		}
+
+		function onScanSuccess(decodedText, decodedResult) {
+			if (isValidLoginQRCode(decodedText)) {
+				processDecodedText(decodedText);
+			} else {
+				document.getElementById("scan-result").textContent = `${decodedText} - Maaf, ini bukan QR code untuk login`;
+			}
+		}
+
+		function onScanError(errorMessage) {
+			console.error(errorMessage);
+		}
+
+		function isValidLoginQRCode(decodedText) {
+			const loginURLPattern = /^(https?:\/\/)[\w\-]+(\.[\w\-]+)+/;
+			return loginURLPattern.test(decodedText);
+		}
+
+		Html5Qrcode.getCameras().then(devices => {
+			let cameraId;
+			if (devices && devices.length) {
+				cameraId = devices.find(device => device.label.toLowerCase().includes('back'))?.id;
+				if (!cameraId) {
+					cameraId = devices[0].id;
+				}
+				html5QrCode = new Html5Qrcode("reader");
+				showLoading();
+				html5QrCode.start(
+					cameraId, 
+					{
+						fps: 10,
+						qrbox: { width: 180, height: 250 }
+					},
+					onScanSuccess,
+					onScanError
+				).then(() => {
+					hideLoading();
+				}).catch(err => {
+					hideLoading();
+					console.error(`Error starting camera: ${err}`);
+				});
+			} else {
+				console.error("No cameras found.");
+			}
+		}).catch(err => {
+			hideLoading();
+			console.error(`Error getting cameras: ${err}`);
+		});
+
+		setTimeout(() => {
+			document.getElementById("upload-button").style.display = "inline";
+		}, 2000);
+
+		document.getElementById("upload-button").addEventListener("click", () => {
+			isUsingCamera = false;
+			document.getElementById("qr-input-file").click();
+		});
+
+		document.getElementById("qr-input-file").addEventListener("change", (event) => {
+			if (event.target.files.length == 0) {
+				return;
+			}
+
+			const file = event.target.files[0];
+
+			if (html5QrCode) {
+				html5QrCode.stop().then(ignore => {
+					console.log("Camera stopped.");
+					document.getElementById("reader").innerHTML = `<img src="${URL.createObjectURL(file)}" style="width:300px; height:300px;" id="uploaded-image"/>`;
+					html5QrCode.scanFile(file, true)
+						.then(decodedText => {
+							processDecodedText(decodedText);
+						})
+						.catch(err => {
+							console.error(`Error scanning file: ${err}`);
+							document.getElementById("scan-result").textContent = "Gagal scan gambar, coba untuk potong gambar dan ambil bagian QR code-nya";
+
+							setTimeout(() => {
+								location.reload();
+							}, 2000);
+						});
+				}).catch(err => {
+					console.error(`Error stopping camera: ${err}`);
+				});
+			}
+		});
+	</script>
+    </center>
+</body>
+</html>
