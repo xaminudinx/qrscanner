@@ -2,32 +2,30 @@
 <html lang="en">
 
 <script>
-    // Fungsi untuk mendeteksi apakah menggunakan HTML view dalam aplikasi
-    function isHtmlView() {
-        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-
-        // Cek apakah user agent adalah aplikasi Android atau iOS yang menggunakan WebView
-        if (/android/i.test(userAgent) && !/chrome|firefox|safari/i.test(userAgent)) {
-            return true;
-        }
-        if (/iPhone|iPod|iPad/i.test(userAgent) && !/Safari/i.test(userAgent)) {
-            return true;
-        }
-        return false;
+    function isMobile() {
+        return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     }
 
-    // Fungsi untuk mengarahkan pengguna ke browser
-    function redirectToBrowser() {
-        if (isHtmlView()) {
-            alert("Anda sedang menggunakan aplikasi. Untuk pengalaman terbaik, silakan buka di browser.");
-            const currentUrl = window.location.href;
-            window.location.href = "googlechrome://navigate?url=" + currentUrl;
+    function openInBrowser() {
+        if (isMobile()) {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+            // Untuk Android WebView
+            if (/android/i.test(userAgent)) {
+                const currentUrl = window.location.href;
+                window.location.href = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end;`;
+            }
+            // Untuk iOS WebView (Safari tidak di WebView)
+            else if (/iPhone|iPad|iPod/i.test(userAgent)) {
+                const currentUrl = window.location.href;
+                window.location.href = `googlechrome://navigate?url=${currentUrl}`;
+            }
         }
     }
 
-    // Panggil fungsi untuk memeriksa dan mengarahkan jika perlu
-    redirectToBrowser();
+    openInBrowser();
 </script>
+
 
 
 <head>
