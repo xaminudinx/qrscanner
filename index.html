@@ -1,33 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<script>
-    function isMobile() {
-        return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    }
-
-    function openInBrowser() {
-        if (isMobile()) {
-            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-
-            // Untuk Android WebView
-            if (/android/i.test(userAgent)) {
-                const currentUrl = window.location.href;
-                window.location.href = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end;`;
-            }
-            // Untuk iOS WebView (Safari tidak di WebView)
-            else if (/iPhone|iPad|iPod/i.test(userAgent)) {
-                const currentUrl = window.location.href;
-                window.location.href = `googlechrome://navigate?url=${currentUrl}`;
-            }
-        }
-    }
-
-    openInBrowser();
-</script>
-
-
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -35,30 +7,30 @@
     <script src="html5-qrcode.min.js"></script>
 
     <style>
-		/* Gaya untuk animasi loading */
-		#loading {
-			width: 100%;
-			height: 100%;
-			background-color: rgba(255, 255, 255, 0.8);
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			margin-top: 10px;
-		}
+        /* Gaya untuk animasi loading */
+        #loading {
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
 
-		.loader {
-			border: 8px solid #f3f3f3;
-			border-radius: 50%;
-			border-top: 8px solid #3498db;
-			width: 50px;
-			height: 50px;
-			animation: spin 1s linear infinite;
-		}
+        .loader {
+            border: 8px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 8px solid #3498db;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
 
-		@keyframes spin {
-			0% { transform: rotate(0deg); }
-			100% { transform: rotate(360deg); }
-		}
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         #reader {
             width: 300px;
             height: 300px; 
@@ -105,10 +77,10 @@
     <center>
         <h1>SCAN QR CODE</h1>
 
-		<!-- Pindahkan elemen loading ke sini -->
-		<div id="loading" style="display: none;">
-			<div class="loader"></div>
-		</div>
+        <!-- Pindahkan elemen loading ke sini -->
+        <div id="loading" style="display: none;">
+            <div class="loader"></div>
+        </div>
 
         <div id="reader" style="width:300px; height:300px;"></div>
         <p id="scan-result"></p>
@@ -116,134 +88,163 @@
         <input type="file" id="qr-input-file" accept="image/*" style="display:none;">
 
         <script>
-		let html5QrCode;
-		let isUsingCamera = true;
+            // Deteksi apakah menggunakan HTML view dalam aplikasi
+            function isMobile() {
+                return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            }
 
-		function showLoading() {
-			document.getElementById("loading").style.display = "flex";
-		}
+            function isInStandaloneMode() {
+                return (window.matchMedia('(display-mode: standalone)').matches) || 
+                       (window.navigator.standalone) || 
+                       document.referrer.includes('android-app://');
+            }
 
-		function hideLoading() {
-			document.getElementById("loading").style.display = "none";
-		}
+            function openInBrowser() {
+                if (isMobile() && isInStandaloneMode()) {
+                    alert("Anda sedang menggunakan aplikasi. Untuk pengalaman terbaik, silakan buka halaman ini di browser.");
+                    const currentUrl = window.location.href;
 
-		function processDecodedText(decodedText) {
-			console.log(`Code scanned = ${decodedText}`);
-			const urlParams = new URLSearchParams(new URL(decodedText).search);
-			const username = urlParams.get('username');
-			const password = urlParams.get('password');
+                    // Untuk Android WebView
+                    if (/android/i.test(navigator.userAgent)) {
+                        window.location.href = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end;`;
+                    } 
+                    // Untuk iOS WebView
+                    else if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                        window.location.href = `googlechrome://navigate?url=${currentUrl}`;
+                    }
+                }
+            }
 
-			if (username && password) {
-				if (username === password) {
-					document.getElementById("scan-result").innerHTML = `Voucher = ${username}`;
-				} else {
-					document.getElementById("scan-result").innerHTML = `username=${username}<br>password=${password}`;
-				}
+            openInBrowser();
 
-				setTimeout(() => {
-					window.location.href = decodedText;
-				}, 1000);
-			} else {
-				document.getElementById("scan-result").textContent = `${decodedText} - Maaf, ini bukan QR code untuk login`;
-				
-				if (!isUsingCamera) {
-					setTimeout(() => {
-						location.reload();
-					}, 2000);
-				} else {
-					setTimeout(() => {
-						document.getElementById("scan-result").textContent = "";
-					}, 2000);
-				}
-			}
-		}
+            let html5QrCode;
+            let isUsingCamera = true;
 
-		function onScanSuccess(decodedText, decodedResult) {
-			if (isValidLoginQRCode(decodedText)) {
-				processDecodedText(decodedText);
-			} else {
-				document.getElementById("scan-result").textContent = `${decodedText} - Maaf, ini bukan QR code untuk login`;
-			}
-		}
+            function showLoading() {
+                document.getElementById("loading").style.display = "flex";
+            }
 
-		function onScanError(errorMessage) {
-			console.error(errorMessage);
-		}
+            function hideLoading() {
+                document.getElementById("loading").style.display = "none";
+            }
 
-		function isValidLoginQRCode(decodedText) {
-			const loginURLPattern = /^(https?:\/\/)[\w\-]+(\.[\w\-]+)+/;
-			return loginURLPattern.test(decodedText);
-		}
+            function processDecodedText(decodedText) {
+                console.log(`Code scanned = ${decodedText}`);
+                const urlParams = new URLSearchParams(new URL(decodedText).search);
+                const username = urlParams.get('username');
+                const password = urlParams.get('password');
 
-		Html5Qrcode.getCameras().then(devices => {
-			let cameraId;
-			if (devices && devices.length) {
-				cameraId = devices.find(device => device.label.toLowerCase().includes('back'))?.id;
-				if (!cameraId) {
-					cameraId = devices[0].id;
-				}
-				html5QrCode = new Html5Qrcode("reader");
-				showLoading();
-				html5QrCode.start(
-					cameraId, 
-					{
-						fps: 10,
-						qrbox: { width: 180, height: 250 }
-					},
-					onScanSuccess,
-					onScanError
-				).then(() => {
-					hideLoading();
-				}).catch(err => {
-					hideLoading();
-					console.error(`Error starting camera: ${err}`);
-				});
-			} else {
-				console.error("No cameras found.");
-			}
-		}).catch(err => {
-			hideLoading();
-			console.error(`Error getting cameras: ${err}`);
-		});
+                if (username && password) {
+                    if (username === password) {
+                        document.getElementById("scan-result").innerHTML = `Voucher = ${username}`;
+                    } else {
+                        document.getElementById("scan-result").innerHTML = `username=${username}<br>password=${password}`;
+                    }
 
-		setTimeout(() => {
-			document.getElementById("upload-button").style.display = "inline";
-		}, 2000);
+                    setTimeout(() => {
+                        window.location.href = decodedText;
+                    }, 1000);
+                } else {
+                    document.getElementById("scan-result").textContent = `${decodedText} - Maaf, ini bukan QR code untuk login`;
 
-		document.getElementById("upload-button").addEventListener("click", () => {
-			isUsingCamera = false;
-			document.getElementById("qr-input-file").click();
-		});
+                    if (!isUsingCamera) {
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+                    } else {
+                        setTimeout(() => {
+                            document.getElementById("scan-result").textContent = "";
+                        }, 2000);
+                    }
+                }
+            }
 
-		document.getElementById("qr-input-file").addEventListener("change", (event) => {
-			if (event.target.files.length == 0) {
-				return;
-			}
+            function onScanSuccess(decodedText, decodedResult) {
+                if (isValidLoginQRCode(decodedText)) {
+                    processDecodedText(decodedText);
+                } else {
+                    document.getElementById("scan-result").textContent = `${decodedText} - Maaf, ini bukan QR code untuk login`;
+                }
+            }
 
-			const file = event.target.files[0];
+            function onScanError(errorMessage) {
+                console.error(errorMessage);
+            }
 
-			if (html5QrCode) {
-				html5QrCode.stop().then(ignore => {
-					console.log("Camera stopped.");
-					document.getElementById("reader").innerHTML = `<img src="${URL.createObjectURL(file)}" style="width:300px; height:300px;" id="uploaded-image"/>`;
-					html5QrCode.scanFile(file, true)
-						.then(decodedText => {
-							processDecodedText(decodedText);
-						})
-						.catch(err => {
-							console.error(`Error scanning file: ${err}`);
-							document.getElementById("scan-result").textContent = "Gagal scan gambar, coba untuk potong gambar dan ambil bagian QR code-nya";
+            function isValidLoginQRCode(decodedText) {
+                const loginURLPattern = /^(https?:\/\/)[\w\-]+(\.[\w\-]+)+/;
+                return loginURLPattern.test(decodedText);
+            }
 
-							setTimeout(() => {
-								location.reload();
-							}, 2000);
-						});
-				}).catch(err => {
-					console.error(`Error stopping camera: ${err}`);
-				});
-			}
-		});
-	</script>
+            Html5Qrcode.getCameras().then(devices => {
+                let cameraId;
+                if (devices && devices.length) {
+                    cameraId = devices.find(device => device.label.toLowerCase().includes('back'))?.id;
+                    if (!cameraId) {
+                        cameraId = devices[0].id;
+                    }
+                    html5QrCode = new Html5Qrcode("reader");
+                    showLoading();
+                    html5QrCode.start(
+                        cameraId, 
+                        {
+                            fps: 10,
+                            qrbox: { width: 180, height: 250 }
+                        },
+                        onScanSuccess,
+                        onScanError
+                    ).then(() => {
+                        hideLoading();
+                    }).catch(err => {
+                        hideLoading();
+                        console.error(`Error starting camera: ${err}`);
+                    });
+                } else {
+                    console.error("No cameras found.");
+                }
+            }).catch(err => {
+                hideLoading();
+                console.error(`Error getting cameras: ${err}`);
+            });
+
+            setTimeout(() => {
+                document.getElementById("upload-button").style.display = "inline";
+            }, 2000);
+
+            document.getElementById("upload-button").addEventListener("click", () => {
+                isUsingCamera = false;
+                document.getElementById("qr-input-file").click();
+            });
+
+            document.getElementById("qr-input-file").addEventListener("change", (event) => {
+                if (event.target.files.length == 0) {
+                    return;
+                }
+
+                const file = event.target.files[0];
+
+                if (html5QrCode) {
+                    html5QrCode.stop().then(ignore => {
+                        console.log("Camera stopped.");
+                        document.getElementById("reader").innerHTML = `<img src="${URL.createObjectURL(file)}" style="width:300px; height:300px;" id="uploaded-image"/>`;
+                        html5QrCode.scanFile(file, true)
+                            .then(decodedText => {
+                                processDecodedText(decodedText);
+                            })
+                            .catch(err => {
+                                console.error(`Error scanning file: ${err}`);
+                                document.getElementById("scan-result").textContent = "Gagal scan gambar, coba untuk potong gambar dan ambil bagian QR code-nya";
+
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 2000);
+                            });
+                    }).catch(err => {
+                        console.error(`Error stopping camera: ${err}`);
+                    });
+                }
+            });
+        </script>
     </center>
 </body>
 </html>
