@@ -87,23 +87,7 @@
         <button id="upload-button">Upload Kode QR</button>
         <input type="file" id="qr-input-file" accept="image/*" style="display:none;">
 
-        <<!-- Link manual untuk membuka di browser -->
-        <p id="open-in-browser" style="display: none;">
-            <a href="https://www.example.com" target="_blank">Klik di sini untuk membuka halaman ini di browser</a>
-        </p>
-
         <script>
-            function showOpenInBrowserLink() {
-                const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-                const isMobile = /iPhone|iPad|iPod|Android/i.test(userAgent);
-
-                if (isMobile) {
-                    document.getElementById("open-in-browser").style.display = "block";
-                }
-            }
-
-            showOpenInBrowserLink();
-            
 		let html5QrCode;
 		let isUsingCamera = true;
 
