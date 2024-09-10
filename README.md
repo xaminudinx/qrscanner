@@ -1,7 +1,7 @@
 
 # aplikasi scan qrcode untuk hotspot
 
-silahkan di buka <button onclick="window.location='https://xaminudinx.github.io/qrscanner';">QR Code</button>
+silahkan di buka https://xaminudinx.github.io/qrscanner
 
 
 di profile hotspot centah login by http-pap
