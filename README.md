@@ -6,7 +6,7 @@ silahkan di buka https://xaminudinx.github.io/qrscanner
 
 di profile hotspot centah login by http-pap
 
-untuk pengaplikasian di mikrotik silahkan copy paste di terminal  
+untuk pengaplikasian di mikrotik hotpsot agar bypass sebelum login hotspot silahkan copy paste di terminal  
 
 ```html
 /ip hotspot walled-garden ip \
