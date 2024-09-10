@@ -1,6 +1,9 @@
 
 # aplikasi scan qrcode untuk hotspot
 
+silahkan di buka <button onclick="window.location='https://xaminudinx.github.io/qrscanner';">QR Code</button>
+
+
 di profile hotspot centah login by http-pap
 
 untuk pengaplikasian di mikrotik silahkan copy paste di terminal  
