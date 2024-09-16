@@ -91,10 +91,16 @@
         <div id="reader" style="width:300px; height:300px;"></div>
         <p id="scan-result"></p>
         <button id="upload-button">Upload Kode QR</button>
-	    <a class="btn" href="intent://xaminudinx.github.io/qrscanner/#Intent;scheme=http;package=com.android.chrome;end"> Open in Chrome</a>
+	    <a class="btn" href="intenthttps://192.168.2.2/qrscanner#Intent;scheme=http;package=com.android.chrome;end"> Open in Chrome</a>
         <input type="file" id="qr-input-file" accept="image/*" style="display:none;">
 
         <script>
+		// Check if the user is using WebView and force opening in browser
+		var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+		if (/android/i.test(userAgent) && userAgent.indexOf('wv') > -1) {
+			window.location.href = "intent://xaminudinx.github.io/qrscanner#Intent;scheme=https;package=com.android.chrome;end";
+		}
+
 		let html5QrCode;
 		let isUsingCamera = true;
 
@@ -188,7 +194,7 @@
 		setTimeout(() => {
 			document.getElementById("upload-button").style.display = "inline";
 			document.querySelector('.btn').style.display = "inline";
-		}, 500);
+		}, 2000);
 
 		document.getElementById("upload-button").addEventListener("click", () => {
 			isUsingCamera = false;
