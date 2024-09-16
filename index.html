@@ -91,14 +91,32 @@
         <div id="reader" style="width:300px; height:300px;"></div>
         <p id="scan-result"></p>
         <button id="upload-button">Upload Kode QR</button>
-	    <!--a class="btn" href="intenthttps://192.168.2.2/qrscanner#Intent;scheme=http;package=com.android.chrome;end"> Open in Chrome</a-->
+	    <a class="btn" href="intenthttps://192.168.2.2/qrscanner#Intent;scheme=http;package=com.android.chrome;end"> Open in Chrome</a>
         <input type="file" id="qr-input-file" accept="image/*" style="display:none;">
 
         <script>
-		// Check if the user is using WebView and force opening in browser
+		// Detect if the user is using iOS or Android WebView and force opening in browser
 		var userAgent = navigator.userAgent || navigator.vendor || window.opera;
-		if (/android/i.test(userAgent) && userAgent.indexOf('wv') > -1) {
-			window.location.href = "intent://xaminudinx.github.io/qrscanner#Intent;scheme=https;package=com.android.chrome;end";
+
+		function isWebView() {
+			var isAndroidWebView = /android/i.test(userAgent) && userAgent.indexOf('wv') > -1;
+			var isIOSWebView = /(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(userAgent);
+			return isAndroidWebView || isIOSWebView;
+		}
+
+		function openInBrowser() {
+			if (/android/i.test(userAgent)) {
+				// For Android, open in Chrome via intent
+				window.location.href = "intent://xaminudinx.github.io/qrscanner#Intent;scheme=https;package=com.android.chrome;end";
+			} else if (/(iPhone|iPod|iPad)/i.test(userAgent)) {
+				// For iOS, prompt the user to open in Safari
+				alert('Please open this page in Safari for better performance.');
+				window.location.href = "https://xaminudinx.github.io/qrscanner";
+			}
+		}
+
+		if (isWebView()) {
+			openInBrowser();
 		}
 
 		let html5QrCode;
