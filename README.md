@@ -1,3 +1,5 @@
+#Udate 22/12/2025
+bukan qrlogin restart kamera tanpa reload halaman
 
 # aplikasi scan qrcode untuk hotspot
 
