@@ -15,6 +15,33 @@
     font-family: Arial, sans-serif;
 }
 
+    /* Mode Malam Otomatis */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: black;
+        color: white; /* agar teks tetap terlihat */
+    }
+
+    #reader {
+        border: 1px solid #fff; /* opsional, agar border terlihat di mode gelap */
+    }
+
+    button {
+        background-color: #555; /* tombol lebih gelap */
+        color: white;
+    }
+
+    button:hover {
+        background-color: #777;
+    }
+
+    #https-warning {
+        background-color: #aa2222;
+        color: white;
+    }
+}
+
+
 .page-container {
     width: 100%;
     min-height: 100vh;
